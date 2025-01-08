@@ -1,86 +1,50 @@
-# Heart Disease Prediction Flask Application
+# Heart Disease Prediction Application
 
-A Flask web application for heart disease prediction using machine learning.
+🔗 **Live Project**: [Heart Disease Predictor](https://user:1f025c1a727327ee0aff905076f3292b@heart-disease-app-tunnel-0hhbqcro.devinapps.com)
 
-## Environment Setup
+## Application Preview
+![Heart Disease Prediction App](/static/images/app_preview.png)
 
-1. Create a virtual environment and activate it:
-```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-```
+## About
+This Flask-based web application helps predict the likelihood of heart disease using machine learning. It provides both a user-friendly interface for patients and a specialized portal for healthcare professionals.
 
-2. Install dependencies:
-```bash
-pip install -r requirements.txt
-```
+### Features
+- Heart disease prediction using Random Forest Classifier
+- Separate portals for patients and doctors
+- Secure authentication system
+- Interactive prediction interface
+- Professional medical dashboard
 
-3. Set up MySQL database:
-```bash
-# Install MySQL if not already installed
-sudo apt-get update
-sudo apt-get install mysql-server
-sudo systemctl start mysql
+## Technologies Used
+- Python 3.8.18
+- Flask 2.0.1
+- scikit-learn 1.2.2
+- MySQL Database
+- HTML/CSS/JavaScript
 
-# Create database
-sudo mysql -e "CREATE DATABASE IF NOT EXISTS hdp;"
-```
+## Setup Instructions
+1. Clone the repository
+2. Create a virtual environment:
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
+3. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+4. Set up environment variables using `.env.example` as template
+5. Run the application:
+   ```bash
+   python app.py
+   ```
 
-4. Configure environment variables:
-- Copy `.env.example` to `.env`
-- Update the values in `.env` with your configuration
+## Project Structure
+- `/templates` - HTML templates
+- `/static` - CSS, JavaScript, and images
+- `/prediction` - ML model and prediction logic
+- `/admin` - Admin portal functionality
 
-### Required Environment Variables
-
-- `MODEL_PATH`: Path to the ML model file (default: models/modal2.pkl)
-  - Purpose: Specifies the location of the trained machine learning model
-  - Format: Relative or absolute path to .pkl file
-
-- `DATABASE_URL`: MySQL database connection string
-  - Purpose: Database connection configuration
-  - Format: mysql://username:password@host:port/hdp
-  - Example format: mysql://user:pass@localhost/hdp
-
-- `SECRET_KEY`: Flask application secret key
-  - Purpose: Used for session security and CSRF protection
-  - Format: Random string of characters (recommended length: 24+ characters)
-
-- `API_KEY`: Instamojo payment gateway API key
-  - Purpose: Authentication for payment processing
-  - Format: Provided by Instamojo dashboard
-
-- `AUTH_TOKEN`: Instamojo authentication token
-  - Purpose: Secondary authentication for payment processing
-  - Format: Provided by Instamojo dashboard
-
-## Features
-
-- User Registration and Authentication
-- Heart Disease Prediction
-- Payment Integration
-- Admin Dashboard
-- Doctor Management
-
-## Running the Application
-
-```bash
-python app.py
-```
-
-The application will be available at http://localhost:5000
-
-## Features
-
-- User Registration and Authentication
-- Heart Disease Prediction
-- Payment Integration
-- Admin Dashboard
-- Doctor Management
-
-## Running the Application
-
-```bash
-python app.py
-```
-
-The application will be available at http://localhost:5000
+## Contributors
+- Original repository by [obadoni2](https://github.com/obadoni2/-Heart-diseases-flask)
+- Enhanced and maintained by [raimonvibe](https://github.com/raimonvibe/heart-disease)
