@@ -2,31 +2,26 @@ from flask import Flask, render_template, redirect, url_for, request, session, g
 from flask_sqlalchemy import SQLAlchemy 
 import json 
 from datetime import datetime 
-from app.admin.routes import routes
+from admin.routes import routes
 import pickle 
 import numpy as np 
 import re  # Added for regex operations
+import os  # Added for environment variables
 
 local_server = True
-model = pickle.load(open('/c/Users/EMMA/prediction/disease/modal2.pkl', 'rb'))
+model_path = os.getenv('MODEL_PATH', 'models/modal2.pkl')
+model = pickle.load(open(model_path, 'rb'))
 
 
 app = Flask(__name__)
 
 app.register_blueprint(routes, url_prefix='')
 
-from dotenv import load_dotenv
-import os
-
-load_dotenv()
-
-db_url = os.getenv('DATABASE_URL')
-if db_url and db_url.startswith('postgresql://'):
-    db_url = db_url.replace('postgresql://', 'postgresql+psycopg2://')
-app.config['SQLALCHEMY_DATABASE_URI'] = db_url
+# Configure database with PostgreSQL
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'postgresql://postgres@localhost/hdp')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.secret_key = os.getenv('SECRET_KEY')
-    
+
+# Initialize SQLAlchemy
 db = SQLAlchemy(app)
 
 # payment module code   
@@ -82,7 +77,7 @@ class Dataset(db.Model):
     Thal = db.Column(db.Integer, unique=False, nullable=False)
     Target = db.Column(db.Integer, unique=False, nullable=False)
 
-app.secret_key = 'recordsaremeanttobroken'
+app.secret_key = os.getenv('SECRET_KEY', 'super-secret-key')
 
 @app.before_request 
 def load_users():
@@ -175,7 +170,7 @@ def patlog():
             return render_template('profilepatient.html', user1=user1)
         else:
             msg = "Wrong Credentials !"
-    return render_template('patogin.html', msg=msg)
+    return render_template('patlogin.html', msg=msg)
 
 @app.route('/docregis', methods=['GET', 'POST'])
 def docregis(): 
@@ -230,9 +225,16 @@ def heartcheck():
 @app.route('/predict', methods=['POST'])
 def predict(): 
     if request.method == 'POST':
-        model = pickle.load(open('/c/Users/EMMA/prediction/disease/modal2.pkl', 'rb'))
-        int_features = [int(x) for x in request.form.values()]  # Corrected from value()
-        final_features = [np.array(int_features)]
+        model = pickle.load(open(model_path, 'rb'))
+        features = []
+        for x in request.form.values():
+            try:
+                # Try converting to int first
+                features.append(int(x))
+            except ValueError:
+                # If int conversion fails, try float
+                features.append(float(x))
+        final_features = [np.array(features)]
         prediction = model.predict(final_features)
         output = round(prediction[0],2)
         if output == 1:
@@ -246,7 +248,7 @@ def predict():
 @app.route('/docpredict', methods=['POST'])
 def docpredict():
     if request.method == 'POST':
-        model = pickle.load(open('/c/Users/EMMA/prediction/disease/modal2.pkl', 'rb'))
+        model = pickle.load(open(model_path, 'rb'))
         int_features = [int(x) for x in request.form.values()]
         final_features = [np.array(int_features)]
         prediction = model.predict(final_features)
@@ -391,4 +393,6 @@ def pay():
         return redirect('/')
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    with app.app_context():
+        db.create_all()
+    app.run(debug=True, host='0.0.0.0', port=5000)
