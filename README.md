@@ -1,6 +1,6 @@
 # Heart Disease Prediction Application
 
-🔗 **Live Project**: [Heart Disease Predictor](https://heart-disease-app-tunnel-q4fr1h1a.devinapps.com/doctorlogin)
+🔗 **Live Project**: [Heart Disease Predictor](https://heart-disease-app-tunnel-q4fr1h1a.devinapps.com/)
 
 ## Application Preview
 ![Doctor Login Interface](/app/static/images/heart1.png)
