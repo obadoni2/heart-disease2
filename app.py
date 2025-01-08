@@ -170,7 +170,7 @@ def patlog():
             return render_template('profilepatient.html', user1=user1)
         else:
             msg = "Wrong Credentials !"
-    return render_template('patogin.html', msg=msg)
+    return render_template('patlogin.html', msg=msg)
 
 @app.route('/docregis', methods=['GET', 'POST'])
 def docregis(): 
@@ -395,4 +395,4 @@ def pay():
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0', port=5000)
