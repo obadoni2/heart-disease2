@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "heart-disease-prediction"
+version = "1.0.0"
+authors = [
+    {name = "Raimon", email = "raimon@example.com"},
+]
+description = "Heart Disease Prediction Flask Application"
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = [
+    "Flask==2.0.1",
+    "Flask-SQLAlchemy==2.5.1",
+    "SQLAlchemy==1.4.23",
+    "phonenumbers==8.12.32",
+    "numpy>=1.24.0",
+    "instamojo_wrapper==1.0.0",
+    "python-dotenv==1.0.0",
+    "passlib==1.7.4",
+    "Werkzeug==2.0.3",
+    "scikit-learn==1.2.2",
+    "psycopg2-binary"
+]
+
+[project.urls]
+"Homepage" = "https://github.com/raimonvibe/heart-disease"
