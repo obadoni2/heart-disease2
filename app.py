@@ -17,10 +17,9 @@ app = Flask(__name__)
 
 app.register_blueprint(routes, url_prefix='')
 
-if local_server:
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:@localhost/hdp'
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False 
-    
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'mysql://root:@localhost/hdp')
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
 db = SQLAlchemy(app)
 
 # payment module code   
@@ -76,7 +75,7 @@ class Dataset(db.Model):
     Thal = db.Column(db.Integer, unique=False, nullable=False)
     Target = db.Column(db.Integer, unique=False, nullable=False)
 
-app.secret_key = 'recordsaremeanttobroken'
+app.secret_key = os.getenv('SECRET_KEY', 'super-secret-key')
 
 @app.before_request 
 def load_users():

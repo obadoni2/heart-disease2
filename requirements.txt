@@ -4,3 +4,6 @@ SQLAlchemy==1.4.23
 phonenumbers==8.12.32
 numpy==1.21.2
 instamojo_wrapper==1.0.0
+Werkzeug==2.0.3
+mysql-connector-python==8.0.33
+scikit-learn==1.2.2
