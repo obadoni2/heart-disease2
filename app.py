@@ -6,9 +6,11 @@ from admin.routes import routes
 import pickle 
 import numpy as np 
 import re  # Added for regex operations
+import os  # Added for environment variables
 
 local_server = True
-model = pickle.load(open(r'C:\Users\EMMA\prediction\disease\modal2.pkl', 'rb'))
+model_path = os.getenv('MODEL_PATH', 'models/modal2.pkl')
+model = pickle.load(open(model_path, 'rb'))
 
 
 app = Flask(__name__)
@@ -222,7 +224,7 @@ def heartcheck():
 @app.route('/predict', methods=['POST'])
 def predict(): 
     if request.method == 'POST':
-        model = pickle.load(open(r'C:\Users\EMMA\prediction\disease\modal2.pkl', 'rb'))
+        model = pickle.load(open(model_path, 'rb'))
         int_features = [int(x) for x in request.form.values()]  # Corrected from value()
         final_features = [np.array(int_features)]
         prediction = model.predict(final_features)
@@ -238,7 +240,7 @@ def predict():
 @app.route('/docpredict', methods=['POST'])
 def docpredict():
     if request.method == 'POST':
-        model = pickle.load(open(r'C:\Users\EMMA\prediction\disease\modal2.pkl', 'rb'))
+        model = pickle.load(open(model_path, 'rb'))
         int_features = [int(x) for x in request.form.values()]
         final_features = [np.array(int_features)]
         prediction = model.predict(final_features)
