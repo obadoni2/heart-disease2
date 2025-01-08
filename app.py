@@ -17,9 +17,11 @@ app = Flask(__name__)
 
 app.register_blueprint(routes, url_prefix='')
 
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'mysql://root:@localhost/hdp')
+# Configure database with PostgreSQL
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'postgresql://postgres@localhost/hdp')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+# Initialize SQLAlchemy
 db = SQLAlchemy(app)
 
 # payment module code   
@@ -168,7 +170,7 @@ def patlog():
             return render_template('profilepatient.html', user1=user1)
         else:
             msg = "Wrong Credentials !"
-    return render_template('patogin.html', msg=msg)
+    return render_template('patlogin.html', msg=msg)
 
 @app.route('/docregis', methods=['GET', 'POST'])
 def docregis(): 
@@ -224,8 +226,15 @@ def heartcheck():
 def predict(): 
     if request.method == 'POST':
         model = pickle.load(open(model_path, 'rb'))
-        int_features = [int(x) for x in request.form.values()]  # Corrected from value()
-        final_features = [np.array(int_features)]
+        features = []
+        for x in request.form.values():
+            try:
+                # Try converting to int first
+                features.append(int(x))
+            except ValueError:
+                # If int conversion fails, try float
+                features.append(float(x))
+        final_features = [np.array(features)]
         prediction = model.predict(final_features)
         output = round(prediction[0],2)
         if output == 1:
@@ -384,4 +393,6 @@ def pay():
         return redirect('/')
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    with app.app_context():
+        db.create_all()
+    app.run(debug=True, host='0.0.0.0', port=5000)

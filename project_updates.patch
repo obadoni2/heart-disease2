@@ -1,0 +1,244 @@
+From 22b32247a362c1d37dd39d021ca68ced46ec82f8 Mon Sep 17 00:00:00 2001
+From: Devin AI <158243242+devin-ai-integration[bot]@users.noreply.github.com>
+Date: Wed, 8 Jan 2025 15:40:19 +0000
+Subject: [PATCH] Update project configuration and add database migrations
+
+- Add database migration scripts
+- Update model file path to use environment variables
+- Add scikit-learn 1.2.2 for model compatibility
+- Update documentation with setup instructions
+- Configure MySQL database connection
+
+Co-Authored-By: Raimon Baudoin <robertjanstefan@gmail.com>
+---
+ .python-version                            |   1 +
+ README.md                                  |  49 ++++++++++++++++--
+ admin/__pycache__/__init__.cpython-310.pyc | Bin 170 -> 151 bytes
+ admin/__pycache__/routes.cpython-310.pyc   | Bin 681 -> 662 bytes
+ app.py                                     |   9 ++--
+ migrations/01_create_tables.sql            |  56 +++++++++++++++++++++
+ models/.gitignore                          |   1 +
+ models/README.md                           |   1 +
+ requirements.txt                           |   5 +-
+ 9 files changed, 113 insertions(+), 9 deletions(-)
+ create mode 100644 .python-version
+ create mode 100644 migrations/01_create_tables.sql
+ create mode 100644 models/.gitignore
+ create mode 100644 models/README.md
+
+diff --git a/.python-version b/.python-version
+new file mode 100644
+index 0000000..9919bf8
+--- /dev/null
++++ b/.python-version
+@@ -0,0 +1 @@
++3.10.13
+diff --git a/README.md b/README.md
+index 8d1cf57..35b74f4 100644
+--- a/README.md
++++ b/README.md
+@@ -15,16 +15,59 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
+ pip install -r requirements.txt
+ ```
+ 
+-3. Configure environment variables:
++3. Set up MySQL database:
++```bash
++# Install MySQL if not already installed
++sudo apt-get update
++sudo apt-get install mysql-server
++sudo systemctl start mysql
++
++# Create database
++sudo mysql -e "CREATE DATABASE IF NOT EXISTS hdp;"
++```
++
++4. Configure environment variables:
+ - Copy `.env.example` to `.env`
+ - Update the values in `.env` with your configuration
+ 
+ ### Required Environment Variables
+ 
+ - `MODEL_PATH`: Path to the ML model file (default: models/modal2.pkl)
+-- `SQLALCHEMY_DATABASE_URI`: MySQL database connection string
+-- `API_KEY`: Instamojo API key
++  - Purpose: Specifies the location of the trained machine learning model
++  - Format: Relative or absolute path to .pkl file
++
++- `DATABASE_URL`: MySQL database connection string
++  - Purpose: Database connection configuration
++  - Format: mysql://username:password@host:port/hdp
++  - Example format: mysql://user:pass@localhost/hdp
++
++- `SECRET_KEY`: Flask application secret key
++  - Purpose: Used for session security and CSRF protection
++  - Format: Random string of characters (recommended length: 24+ characters)
++
++- `API_KEY`: Instamojo payment gateway API key
++  - Purpose: Authentication for payment processing
++  - Format: Provided by Instamojo dashboard
++
+ - `AUTH_TOKEN`: Instamojo authentication token
++  - Purpose: Secondary authentication for payment processing
++  - Format: Provided by Instamojo dashboard
++
++## Features
++
++- User Registration and Authentication
++- Heart Disease Prediction
++- Payment Integration
++- Admin Dashboard
++- Doctor Management
++
++## Running the Application
++
++```bash
++python app.py
++```
++
++The application will be available at http://localhost:5000
+ 
+ ## Features
+ 
+diff --git a/admin/__pycache__/__init__.cpython-310.pyc b/admin/__pycache__/__init__.cpython-310.pyc
+index e9e2b80b8d7771772607ebc97193b8221ca0bb11..a21d2c69d12cb17bad83f7f5b1b98ea5300ce7c2 100644
+GIT binary patch
+delta 72
+zcmZ3*IGvFvpO=@50SIPy)TK}4u{N;M&&bbB)h|sd%_}L@FG?-QFV@%fNKGs%(M`!L
+aPE9OME!IuTNi5FRPfW?p%+sIPr2qgI4j0`3
+
+delta 91
+zcmbQvxQdY{pO=@50SMGo;!`H_SUdZsSjA+gmL=xI6ql5yRK^4p<!7ZPmlVfjq!h$>
+tq$U=X#Jgk`rzRGs#s?Iorer3UWaj7Ty7?p)XY0l!rsQVk#Y`+$000xlA1MF;
+
+diff --git a/admin/__pycache__/routes.cpython-310.pyc b/admin/__pycache__/routes.cpython-310.pyc
+index d2ad0990d329eaf36b43ff568175dc95d104160c..43f9a11a28dcbc3ee8faf215b6dba84b901d2907 100644
+GIT binary patch
+delta 76
+zcmZ3<I*pY#pO=@50SIPy)TNhh<PB#uu+Y!Q&rQ`YO)AYRDb+7ZEyyp{*Y!wEEGp4W
+e$t+GyEKV)fP0L9v&el&%$<55u-@KfWi4g#Ln;5tN
+
+delta 95
+zcmbQnx{{SQpO=@50SMGo;!`>|@`f`yd#6~%WT%!T=EM}2l%`b11Qg|Gr6!jY$7G}w
+x#CW787L~-iWEQ6;7N^Ds6s4wQCYNO9=jponBo=4u#w4cXX6D6gp2En)2mqJ0AQ%7u
+
+diff --git a/app.py b/app.py
+index bd37044..f28e2f2 100644
+--- a/app.py
++++ b/app.py
+@@ -17,10 +17,9 @@ app = Flask(__name__)
+ 
+ app.register_blueprint(routes, url_prefix='')
+ 
+-if local_server:
+-    app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:@localhost/hdp'
+-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False 
+-    
++app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'mysql://root:@localhost/hdp')
++app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
++
+ db = SQLAlchemy(app)
+ 
+ # payment module code   
+@@ -76,7 +75,7 @@ class Dataset(db.Model):
+     Thal = db.Column(db.Integer, unique=False, nullable=False)
+     Target = db.Column(db.Integer, unique=False, nullable=False)
+ 
+-app.secret_key = 'recordsaremeanttobroken'
++app.secret_key = os.getenv('SECRET_KEY', 'super-secret-key')
+ 
+ @app.before_request 
+ def load_users():
+diff --git a/migrations/01_create_tables.sql b/migrations/01_create_tables.sql
+new file mode 100644
+index 0000000..6b3048a
+--- /dev/null
++++ b/migrations/01_create_tables.sql
+@@ -0,0 +1,56 @@
++-- Create tables for Heart Disease Prediction Flask Application
++
++-- Users table
++CREATE TABLE IF NOT EXISTS hdpuser (
++    id INT AUTO_INCREMENT PRIMARY KEY,
++    FirstName VARCHAR(120) NOT NULL,
++    LastName VARCHAR(120) NOT NULL,
++    Email VARCHAR(120) NOT NULL,
++    Ph_no VARCHAR(20) NOT NULL,
++    Profession VARCHAR(12) NOT NULL,
++    Username VARCHAR(120) NOT NULL,
++    password VARCHAR(120) NOT NULL
++);
++
++-- Doctors table
++CREATE TABLE IF NOT EXISTS doclog (
++    id INT AUTO_INCREMENT PRIMARY KEY,
++    FirstName VARCHAR(120) NOT NULL,
++    LastName VARCHAR(120) NOT NULL,
++    Ph_no VARCHAR(20) NOT NULL,
++    Profession VARCHAR(12) NOT NULL,
++    Username VARCHAR(120) NOT NULL,
++    password VARCHAR(120) NOT NULL,
++    Email VARCHAR(120) NOT NULL
++);
++
++-- Admin table
++CREATE TABLE IF NOT EXISTS admin (
++    id INT AUTO_INCREMENT PRIMARY KEY,
++    Username VARCHAR(120) NOT NULL,
++    Password VARCHAR(120) NOT NULL
++);
++
++-- Emails table
++CREATE TABLE IF NOT EXISTS emails (
++    id INT AUTO_INCREMENT PRIMARY KEY,
++    Email VARCHAR(120) NOT NULL
++);
++
++-- Dataset table
++CREATE TABLE IF NOT EXISTS dataset (
++    id INT AUTO_INCREMENT PRIMARY KEY,
++    Age INT NOT NULL,
++    sex INT NOT NULL,
++    Cp INT NOT NULL,
++    Trestbps INT NOT NULL,
++    Chol INT NOT NULL,
++    fbs INT NOT NULL,
++    Restecg INT NOT NULL,
++    Thalach INT NOT NULL,
++    Exang INT NOT NULL,
++    Oldpeak INT NOT NULL,
++    Slope INT NOT NULL,
++    Thal INT NOT NULL,
++    Target INT NOT NULL
++);
+diff --git a/models/.gitignore b/models/.gitignore
+new file mode 100644
+index 0000000..1397432
+--- /dev/null
++++ b/models/.gitignore
+@@ -0,0 +1 @@
++*.pkl
+diff --git a/models/README.md b/models/README.md
+new file mode 100644
+index 0000000..5c55d3d
+--- /dev/null
++++ b/models/README.md
+@@ -0,0 +1 @@
++# Machine Learning Model
+diff --git a/requirements.txt b/requirements.txt
+index 2717f73..267887a 100644
+--- a/requirements.txt
++++ b/requirements.txt
+@@ -3,4 +3,7 @@ Flask-SQLAlchemy==2.5.1
+ SQLAlchemy==1.4.23
+ phonenumbers==8.12.32
+ numpy==1.21.2
+-instamojo_wrapper==1.0.0
+\ No newline at end of file
++instamojo_wrapper==1.0.0
++Werkzeug==2.0.3
++mysql-connector-python==8.0.33
++scikit-learn==1.2.2
+-- 
+2.34.1
+
