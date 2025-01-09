@@ -8,4 +8,13 @@ routes = Blueprint('routes',__name__,url_prefix='',template_folder='templates',s
 
 
 
+@routes.route('/patregis')
+def patregis():
+    return render_template('patregis.html')
+
+
+@routes.route('/docregis')
+def docregis():
+    return render_template('docregis.html')
+
     
