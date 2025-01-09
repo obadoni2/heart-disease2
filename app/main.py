@@ -1,5 +1,6 @@
 from flask import Flask, render_template, redirect, url_for, request, session, g, flash
 from flask_sqlalchemy import SQLAlchemy 
+from flask_httpauth import HTTPBasicAuth
 import json 
 from datetime import datetime 
 from admin.routes import routes
@@ -14,6 +15,19 @@ model = pickle.load(open(model_path, 'rb'))
 
 
 app = Flask(__name__)
+basic_auth = HTTPBasicAuth()
+
+# Basic Auth configuration
+@basic_auth.verify_password
+def verify_password(username, password):
+    # Secure credentials for basic authentication
+    return username == "healthapp" and password == "heart2024secure"
+
+# Protect all routes with basic auth
+@app.before_request
+@basic_auth.login_required
+def before_request():
+    pass
 
 app.register_blueprint(routes, url_prefix='')
 
